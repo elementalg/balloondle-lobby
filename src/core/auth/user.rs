@@ -13,4 +13,12 @@ impl User {
             code,
         }
     }
+
+    pub fn get_name(&self) -> &str {
+        self.name.as_str()
+    }
+
+    pub fn get_code(&self) -> &u32 {
+        &self.code
+    }
 }

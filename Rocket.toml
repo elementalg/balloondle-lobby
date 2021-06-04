@@ -1,2 +1,2 @@
 [global.databases]
-balloondle_db={url="postgres://postgres:balloondle@127.0.0.1:5432/balloondle"}
+balloondle_db = { url = "postgres://postgres:balloondle@127.0.0.1:5432/balloondle" }
