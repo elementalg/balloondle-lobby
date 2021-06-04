@@ -13,7 +13,7 @@ mod test;
 mod adapter;
 
 fn main() {
-    rocket::ignite().mount("/", routes![])
-        .attach(database::Database::fairing())
+    rocket::ignite().mount("/", routes![routes::status])
+    .attach(database::Database::fairing())
         .launch();
 }
