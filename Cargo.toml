@@ -1,0 +1,17 @@
+[package]
+name = "web_lobby"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rocket = "0.4.10"
+rand = "0.8.3"
+serde = { version = "1.0", features = ["derive"]}
+serde_json = "1.0"
+
+[dependencies.rocket_contrib]
+version = "0.4.10"
+default-features = false
+features = ["postgres_pool"]
