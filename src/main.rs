@@ -15,6 +15,6 @@ mod error;
 
 fn main() {
     rocket::ignite().mount("/", routes![routes::status])
-    .attach(database::Database::fairing())
+        .attach(database::Database::fairing())
         .launch();
 }

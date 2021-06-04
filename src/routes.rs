@@ -1,12 +1,13 @@
 use rocket::http::Status;
 use rocket::response::content;
-use crate::database::Database;
-use crate::core::auth::authenticator::Authenticator;
-use crate::adapter::postgresql_authenticator::PostgreSQLAuthenticator;
-use crate::core::auth::user::User;
-use crate::core::auth::error::AuthenticationError;
-use crate::error::ApiError;
 use serde_json::Error;
+
+use crate::adapter::postgresql_authenticator::PostgreSQLAuthenticator;
+use crate::core::auth::authenticator::Authenticator;
+use crate::core::auth::error::AuthenticationError;
+use crate::core::auth::user::User;
+use crate::database::Database;
+use crate::error::ApiError;
 
 #[get("/status")]
 pub fn status() -> Status {
@@ -14,7 +15,7 @@ pub fn status() -> Status {
 }
 
 #[get("/user/startup?<name>&<code>")]
-pub fn user_startup(database: Database, name: String, code: u32) -> content::Json<String>  {
+pub fn user_startup(database: Database, name: String, code: u32) -> content::Json<String> {
     let authenticator = get_authenticator_implementation(database);
 
     let user_validity = authenticator.as_ref().are_details_valid(&name, &code);
