@@ -1,7 +1,6 @@
 use rocket_contrib::databases::postgres::rows::Rows;
 use rocket_contrib::databases::postgres::Error;
 
-use crate::adapter::error::AdapterError;
 use crate::core::auth::authenticator::Authenticator;
 use crate::core::auth::error::AuthenticationError;
 use crate::core::auth::user::User;
@@ -16,7 +15,7 @@ impl PostgreSQLAuthenticator {
         PostgreSQLAuthenticator { database }
     }
 
-    fn check_rows_for_user_validity(&self, user: &User, rows: Rows) -> Result<bool, AdapterError> {
+    fn check_rows_for_user_validity(&self, user: &User, rows: Rows) -> Result<bool, AuthenticationError> {
         if rows.len() == 0 {
             Ok(false)
         } else if rows.len() == 1 {
