@@ -2,5 +2,6 @@ use crate::core::auth::user::User;
 use crate::core::auth::error::AuthenticationError;
 
 pub trait Authenticator {
-    fn is_user_valid(&self, user: &User) -> Result<bool, AuthenticationError>;
+    fn are_details_valid(&self, name: &String, code: &u32) -> Result<bool, AuthenticationError>;
+    fn get_user_for_details(&self, name: &String, code: &u32) -> Result<User, AuthenticationError>;
 }

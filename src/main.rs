@@ -11,6 +11,7 @@ mod database;
 #[cfg(test)]
 mod test;
 mod adapter;
+mod error;
 
 fn main() {
     rocket::ignite().mount("/", routes![routes::status])
