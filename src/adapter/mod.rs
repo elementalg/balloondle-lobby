@@ -1,2 +1,1 @@
-mod auth_adapter;
-
+mod postgresql_authenticator;
