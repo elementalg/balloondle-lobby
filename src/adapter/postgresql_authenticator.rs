@@ -1,5 +1,4 @@
 use rocket_contrib::databases::postgres::rows::Rows;
-use rocket_contrib::databases::postgres::Error;
 
 use crate::core::auth::authenticator::Authenticator;
 use crate::core::auth::error::AuthenticationError;
