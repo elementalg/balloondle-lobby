@@ -14,6 +14,27 @@ pub fn status() -> Status {
     Status::Accepted
 }
 
+#[get("/user/signup?<name>")]
+pub fn user_signup(database: Database, name: String) -> content::Json<String>{
+    let authenticator = get_authenticator_implementation(database);
+    let code = rand::random::<u32>();
+
+    authenticator.create_user_with_details(&name, &code);
+
+    let user = User { name, code };
+
+    let user_json = serde_json::to_string(&user);
+
+    match user_json {
+        Ok(valid_user_json) => {
+            content::Json(valid_user_json)
+        }
+        Err(_) => {
+            generate_content_for_error(ApiError::FailedToProcessRequest)
+        }
+    }
+}
+
 #[get("/user/startup?<name>&<code>")]
 pub fn user_startup(database: Database, name: String, code: u32) -> content::Json<String> {
     let authenticator = get_authenticator_implementation(database);

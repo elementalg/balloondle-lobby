@@ -117,4 +117,10 @@ impl Authenticator for PostgreSQLAuthenticator {
             ))),
         }
     }
+
+    fn create_user_with_details(&self, name: &String, code: &u32) {
+        let sql_query: &str = "INSERT INTO player (name, code) VALUES ($1, $2)";
+
+        self.database.0.query(sql_query, &[name, code]);
+    }
 }
