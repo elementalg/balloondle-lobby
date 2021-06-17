@@ -1,6 +1,5 @@
 use rocket::http::Status;
-use rocket::response::content;
-use serde_json::Error;
+use rocket::response::status::{Accepted, BadRequest, Created};
 
 use crate::adapter::postgresql_authenticator::PostgreSQLAuthenticator;
 use crate::core::auth::authenticator::Authenticator;
@@ -14,46 +13,47 @@ pub fn status() -> Status {
     Status::Accepted
 }
 
-#[get("/user/signup?<name>")]
-pub fn user_signup(database: Database, name: String) -> content::Json<String>{
+#[post("/user/signup?<name>")]
+pub fn user_signup(database: Database, name: String) -> Result<Created<String>, Status> {
     let authenticator = get_authenticator_implementation(database);
     let code = rand::random::<u32>();
 
     authenticator.create_user_with_details(&name, &code);
 
-    let user = User { name, code };
+    let user = User::new(name.as_str(), code);
 
     let user_json = serde_json::to_string(&user);
 
     match user_json {
-        Ok(valid_user_json) => {
-            content::Json(valid_user_json)
-        }
-        Err(_) => {
-            generate_content_for_error(ApiError::FailedToProcessRequest)
-        }
+        Ok(valid_user_json) => Ok(Created(String::from(""), Some(valid_user_json))),
+        Err(_) => Err(Status::InternalServerError),
     }
 }
 
-#[get("/user/startup?<name>&<code>")]
-pub fn user_startup(database: Database, name: String, code: u32) -> content::Json<String> {
+#[get("/user/login?<name>&<code>")]
+pub fn user_login(
+    database: Database,
+    name: String,
+    code: u32,
+) -> Result<Result<Accepted<String>, BadRequest<String>>, Status> {
     let authenticator = get_authenticator_implementation(database);
 
-    let user_validity = authenticator.as_ref().are_details_valid(&name, &code);
+    let user_validity = authenticator
+        .as_ref()
+        .are_details_valid(&name, &code);
 
     match user_validity {
         Ok(is_valid) => {
             if is_valid {
-                let user = authenticator.get_user_for_details(&name, &code);
+                let user = authenticator
+                    .get_user_for_details(&name, &code);
 
-                get_content_for_user_result(user)
+                Ok(get_content_for_user_result(user))
             } else {
-                generate_content_for_error(ApiError::InvalidUserDetails)
+                Err(Status::BadRequest)
             }
         }
-        Err(_) => {
-            generate_content_for_error(ApiError::FailedToProcessRequest)
-        }
+        Err(_) => Err(Status::InternalServerError),
     }
 }
 
@@ -61,28 +61,24 @@ fn get_authenticator_implementation(database: Database) -> Box<dyn Authenticator
     Box::new(PostgreSQLAuthenticator::new(database))
 }
 
-fn get_content_for_user_result(user_result: Result<User, AuthenticationError>) -> content::Json<String> {
+fn get_content_for_user_result(
+    user_result: Result<User, AuthenticationError>,
+) -> Result<Accepted<String>, BadRequest<String>> {
     match user_result {
         Ok(user) => {
             let user_json = serde_json::to_string(&user);
 
             match user_json {
-                Ok(valid_user_json) => {
-                    content::Json(valid_user_json)
-                }
-                Err(_) => {
-                    generate_content_for_error(ApiError::FailedToProcessRequest)
-                }
+                Ok(valid_user_json) => Ok(Accepted(Some(valid_user_json))),
+                Err(_) => Err(BadRequest(Some(get_json_for_error(ApiError::FailedToProcessRequest)))),
             }
         }
-        Err(_) => {
-            generate_content_for_error(ApiError::InvalidUserDetails)
-        }
+        Err(_) => Err(BadRequest(Some(get_json_for_error(ApiError::InvalidUserDetails)))),
     }
 }
 
-fn generate_content_for_error(error: ApiError) -> content::Json<String> {
-    let error_data: String = String::from(format!("{{ 'error': '{}' }}", error as u32));
+fn get_json_for_error(error: ApiError) -> String {
+    let error_data: String = String::from(format!("{{ 'error' : '{}' }}", error as u32));
 
-    content::Json(error_data)
+    error_data
 }
