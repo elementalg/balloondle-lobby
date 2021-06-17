@@ -14,7 +14,8 @@ mod adapter;
 mod error;
 
 fn main() {
-    rocket::ignite().mount("/", routes![routes::status, routes::user_startup])
+    rocket::ignite()
+        .mount("/", routes![routes::status, routes::user_signup, routes::user_login])
         .attach(database::Database::fairing())
         .launch();
 }
