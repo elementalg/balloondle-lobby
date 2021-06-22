@@ -1,1 +1,0 @@
-cargo run --package web_lobby --bin web_lobby
