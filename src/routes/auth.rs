@@ -8,11 +8,6 @@ use crate::core::auth::user::User;
 use crate::database::Database;
 use crate::error::ApiError;
 
-#[get("/status")]
-pub fn status() -> Status {
-    Status::Accepted
-}
-
 #[post("/user/signup?<name>")]
 pub fn user_signup(database: Database, name: String) -> Result<Created<String>, Status> {
     let authenticator = get_authenticator_implementation(database);
@@ -38,15 +33,12 @@ pub fn user_login(
 ) -> Result<Result<Accepted<String>, BadRequest<String>>, Status> {
     let authenticator = get_authenticator_implementation(database);
 
-    let user_validity = authenticator
-        .as_ref()
-        .are_details_valid(&name, &code);
+    let user_validity = authenticator.as_ref().are_details_valid(&name, &code);
 
     match user_validity {
         Ok(is_valid) => {
             if is_valid {
-                let user = authenticator
-                    .get_user_for_details(&name, &code);
+                let user = authenticator.get_user_for_details(&name, &code);
 
                 Ok(get_content_for_user_result(user))
             } else {
@@ -70,10 +62,14 @@ fn get_content_for_user_result(
 
             match user_json {
                 Ok(valid_user_json) => Ok(Accepted(Some(valid_user_json))),
-                Err(_) => Err(BadRequest(Some(get_json_for_error(ApiError::FailedToProcessRequest)))),
+                Err(_) => Err(BadRequest(Some(get_json_for_error(
+                    ApiError::FailedToProcessRequest,
+                )))),
             }
         }
-        Err(_) => Err(BadRequest(Some(get_json_for_error(ApiError::InvalidUserDetails)))),
+        Err(_) => Err(BadRequest(Some(get_json_for_error(
+            ApiError::InvalidUserDetails,
+        )))),
     }
 }
 

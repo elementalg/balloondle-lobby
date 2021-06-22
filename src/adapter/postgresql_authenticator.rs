@@ -89,6 +89,10 @@ impl PostgreSQLAuthenticator {
             )))
         }
     }
+
+    pub fn get_database_ownership(self) -> Database {
+        self.database
+    }
 }
 
 impl Authenticator for PostgreSQLAuthenticator {
